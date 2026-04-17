@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KyckStreamTV</title>
+  <style>
+    body { background: #0E0E10; color: #fff; font-family: sans-serif;
+           display: flex; align-items: center; justify-content: center;
+           height: 100vh; margin: 0; }
+    p { color: #53FC18; font-size: 1.2rem; }
+  </style>
+</head>
+<body>
+  <p>Přihlašování... vracím se do aplikace.</p>
+  <script>
+    var params = new URLSearchParams(window.location.search);
+    var code  = params.get('code');
+    var error = params.get('error');
+    if (code) {
+      window.location.href = 'kyckstreamtv://auth/callback?code=' + encodeURIComponent(code);
+    } else if (error) {
+      window.location.href = 'kyckstreamtv://auth/callback?error=' + encodeURIComponent(error);
+    }
+  </script>
+</body>
+</html>
