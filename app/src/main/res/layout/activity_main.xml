@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="@dimen/spacing_xxl">
+
+    <!-- Logo / App name -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/app_name"
+        android:textColor="@color/kick_green"
+        android:textSize="@dimen/text_title"
+        android:fontFamily="sans-serif-medium"
+        android:layout_marginBottom="@dimen/spacing_xl" />
+
+    <!-- Subtitle -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/label_enter_channel"
+        android:textColor="@color/text_secondary"
+        android:textSize="@dimen/text_medium"
+        android:layout_marginBottom="@dimen/spacing_md" />
+
+    <!-- Channel name input -->
+    <EditText
+        android:id="@+id/et_channel_name"
+        android:layout_width="360dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/edittext_bg"
+        android:textColor="@color/text_primary"
+        android:textColorHint="@color/text_secondary"
+        android:textCursorDrawable="@null"
+        android:textSize="@dimen/text_medium"
+        android:paddingStart="@dimen/spacing_md"
+        android:paddingEnd="@dimen/spacing_md"
+        android:paddingTop="14dp"
+        android:paddingBottom="14dp"
+        android:hint="@string/hint_channel_name"
+        android:inputType="textNoSuggestions"
+        android:imeOptions="actionGo"
+        android:singleLine="true"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:nextFocusDown="@id/btn_watch"
+        android:layout_marginBottom="@dimen/spacing_lg" />
+
+    <!-- Watch button -->
+    <Button
+        android:id="@+id/btn_watch"
+        android:layout_width="180dp"
+        android:layout_height="52dp"
+        android:text="@string/btn_watch"
+        android:backgroundTint="@color/kick_green"
+        android:textColor="@color/background"
+        android:textSize="@dimen/text_medium"
+        android:fontFamily="sans-serif-medium"
+        android:nextFocusUp="@id/et_channel_name"
+        android:focusable="true" />
+
+</LinearLayout>

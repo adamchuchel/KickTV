@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="kick_green">#53FC18</color>
+    <color name="background">#0E0E10</color>
+    <color name="surface">#1F1F23</color>
+    <color name="surface_elevated">#26262B</color>
+    <color name="text_primary">#FFFFFF</color>
+    <color name="text_secondary">#ADADB8</color>
+    <color name="text_hint">#5C5C7A</color>
+</resources>

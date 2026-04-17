@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background">
+
+    <!-- Main split: player (70%) + chat (30%) -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+
+        <!-- Player area -->
+        <FrameLayout
+            android:id="@+id/player_container"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="7"
+            android:background="@android:color/black">
+
+            <androidx.media3.ui.PlayerView
+                android:id="@+id/player_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:focusable="true" />
+
+            <!-- Stream title bar (bottom of player) -->
+            <TextView
+                android:id="@+id/tv_stream_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:background="#CC000000"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:padding="@dimen/spacing_sm"
+                android:textColor="@color/text_primary"
+                android:textSize="@dimen/text_small" />
+
+            <!-- Loading / Offline / Error overlay -->
+            <TextView
+                android:id="@+id/tv_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:textColor="@color/text_primary"
+                android:textSize="@dimen/text_medium"
+                android:visibility="gone" />
+
+        </FrameLayout>
+
+        <!-- Chat sidebar -->
+        <LinearLayout
+            android:id="@+id/chat_container"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="3"
+            android:background="@color/surface"
+            android:orientation="vertical">
+
+            <!-- Chat header -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/label_chat"
+                android:textColor="@color/kick_green"
+                android:textSize="@dimen/text_small"
+                android:fontFamily="sans-serif-medium"
+                android:padding="@dimen/spacing_sm"
+                android:gravity="center_horizontal"
+                android:background="@color/surface_elevated" />
+
+            <!-- Chat messages -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_chat"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:clipToPadding="false"
+                android:paddingStart="@dimen/spacing_xs"
+                android:paddingEnd="@dimen/spacing_xs"
+                android:paddingBottom="@dimen/spacing_xs"
+                android:scrollbars="none" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</FrameLayout>

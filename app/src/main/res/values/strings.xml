@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">KyckStreamTV</string>
+    <string name="label_enter_channel">Enter channel name</string>
+    <string name="hint_channel_name">e.g. xQc</string>
+    <string name="btn_watch">Watch</string>
+    <string name="label_chat">CHAT</string>
+    <string name="msg_channel_offline">Channel is offline</string>
+    <string name="msg_loading">Loading stream…</string>
+</resources>
