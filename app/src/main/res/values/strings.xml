@@ -7,4 +7,13 @@
     <string name="label_chat">CHAT</string>
     <string name="msg_channel_offline">Channel is offline</string>
     <string name="msg_loading">Loading stream…</string>
+    <string name="row_live_following">Živě – Sleduji</string>
+    <string name="row_offline_following">Offline – Sleduji</string>
+    <string name="row_popular">Populární streamy</string>
+    <string name="row_videos">Videa</string>
+    <string name="action_watch_live">Sledovat živě</string>
+    <string name="label_offline">Offline</string>
+    <string name="label_live">Živě</string>
+    <string name="label_views">zhlédnutí</string>
+    <string name="label_duration">Délka</string>
 </resources>

@@ -27,7 +27,7 @@ class KickChatManager(
         .build()
 
     fun connect() {
-        val url = "wss://ws-us2.pusher.com/app/eb1d5f283081a78b932c" +
+        val url = "wss://ws-us2.pusher.com/app/32cbd69e4b950bf97679" +
             "?protocol=7&client=js&version=7.6.0&flash=false"
 
         val request = Request.Builder()
@@ -75,9 +75,7 @@ class KickChatManager(
                 "App\\Events\\ChatMessageEvent" -> {
                     val dataStr = json.get("data")?.asString ?: return
                     val message = gson.fromJson(dataStr, ChatMessage::class.java)
-                    if (message.type == "message") {
-                        onMessage(message)
-                    }
+                    onMessage(message)
                 }
             }
         } catch (e: Exception) {

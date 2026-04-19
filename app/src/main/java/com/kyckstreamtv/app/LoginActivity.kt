@@ -48,7 +48,7 @@ class LoginActivity : AppCompatActivity() {
             override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
                 val url = request.url.toString()
                 // Intercept the custom-scheme redirect from the GitHub Pages callback
-                if (url.startsWith(Config.KICK_REDIRECT_SCHEME)) {
+                if (url.startsWith(Config.KICK_REDIRECT_URI)) {
                     val code = request.url.getQueryParameter("code")
                     val error = request.url.getQueryParameter("error")
                     when {
@@ -87,7 +87,7 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun goToMain() {
-        startActivity(Intent(this, MainActivity::class.java))
+        startActivity(Intent(this, HomeActivity::class.java))
         finish()
     }
 

@@ -72,8 +72,8 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(this, "Enter a channel name", Toast.LENGTH_SHORT).show()
             return
         }
-        startActivity(Intent(this, PlayerActivity::class.java).apply {
-            putExtra(PlayerActivity.EXTRA_CHANNEL, channelName)
+        startActivity(Intent(this, ChannelActivity::class.java).apply {
+            putExtra(ChannelActivity.EXTRA_SLUG, channelName)
         })
     }
 

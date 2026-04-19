@@ -7,10 +7,16 @@ import com.kyckstreamtv.app.api.KickRepository
 import com.kyckstreamtv.app.chat.KickChatManager
 import com.kyckstreamtv.app.model.ChatMessage
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import java.util.TimeZone
 
 sealed class PlayerState {
     object Loading : PlayerState()
@@ -31,6 +37,13 @@ class PlayerViewModel : ViewModel() {
     val chatConnected: StateFlow<Boolean> = _chatConnected
 
     private var chatManager: KickChatManager? = null
+    private var vodPollingJob: Job? = null
+
+    // VOD state
+    private var isVodMode = false
+    private var vodChatroomId: Int = -1
+    private var vodStartEpochMs: Long = 0L
+    private var vodCurrentOffsetMs: Long = 0L
 
     fun loadChannel(username: String) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -56,8 +69,15 @@ class PlayerViewModel : ViewModel() {
 
                 val streamUrl = livestream?.playbackUrl?.takeIf { it.isNotBlank() }
                     ?: channel.playbackUrl?.takeIf { it.isNotBlank() }
+                    ?: try {
+                        KickRepository.api.getPlaybackUrl(username).data?.takeIf { it.isNotBlank() }
+                            .also { Log.d(TAG, "playback-url endpoint: $it") }
+                    } catch (e: Exception) {
+                        Log.w(TAG, "getPlaybackUrl failed: ${e.message}")
+                        null
+                    }
 
-                val isLive = livestream?.isLive ?: (channel.livestream != null)
+                val isLive = channel.livestream?.isLive ?: (livestream?.isLive ?: false)
 
                 if (!isLive || streamUrl.isNullOrBlank()) {
                     Log.d(TAG, "Channel offline — isLive=$isLive streamUrl=$streamUrl")
@@ -94,6 +114,57 @@ class PlayerViewModel : ViewModel() {
         }
     }
 
+    fun loadVod(vodUrl: String, startTime: String, chatroomId: Int, title: String) {
+        isVodMode = true
+        vodChatroomId = chatroomId
+        vodStartEpochMs = parseStartTime(startTime)
+        vodCurrentOffsetMs = 0L
+
+        Log.d(TAG, "VOD mode: url=$vodUrl startTime=$startTime chatroomId=$chatroomId")
+        _playerState.value = PlayerState.Ready(title, vodUrl, 0)
+    }
+
+    fun updateVodPosition(playerPositionMs: Long) {
+        if (!isVodMode) return
+        vodCurrentOffsetMs = playerPositionMs
+    }
+
+    fun startVodChatPolling() {
+        if (!isVodMode || vodChatroomId < 0) return
+        vodPollingJob?.cancel()
+        vodPollingJob = viewModelScope.launch(Dispatchers.IO) {
+            while (true) {
+                try {
+                    val queryTimeMs = vodStartEpochMs + vodCurrentOffsetMs
+                    val queryTimeStr = formatEpochAsIso(queryTimeMs)
+                    Log.d(TAG, "VOD chat poll: chatroomId=$vodChatroomId time=$queryTimeStr")
+
+                    val response = KickRepository.api.getVodMessages(vodChatroomId, queryTimeStr)
+
+                    // Flexible parsing: try data.messages first, then root messages
+                    val messages = response.data?.messages
+                        ?: response.messages
+                        ?: emptyList()
+
+                    Log.d(TAG, "VOD chat: got ${messages.size} msgs (data=${response.data}, rootMsgs=${response.messages?.size})")
+
+                    if (messages.isNotEmpty()) {
+                        val updated = (_chatMessages.value + messages).takeLast(MAX_CHAT_MESSAGES)
+                        _chatMessages.value = updated
+                    }
+                } catch (e: Exception) {
+                    Log.w(TAG, "VOD chat poll error: ${e.message}")
+                }
+                delay(VOD_POLL_INTERVAL_MS)
+            }
+        }
+    }
+
+    fun stopVodChatPolling() {
+        vodPollingJob?.cancel()
+        vodPollingJob = null
+    }
+
     private fun connectChat(chatroomId: Int) {
         chatManager?.disconnect()
         chatManager = KickChatManager(
@@ -109,13 +180,35 @@ class PlayerViewModel : ViewModel() {
         chatManager?.connect()
     }
 
+    private fun parseStartTime(startTime: String): Long {
+        // Input format: "2026-04-18 21:54:14"
+        return try {
+            val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US).apply {
+                timeZone = TimeZone.getTimeZone("UTC")
+            }
+            sdf.parse(startTime)?.time ?: 0L
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to parse startTime: $startTime — ${e.message}")
+            0L
+        }
+    }
+
+    private fun formatEpochAsIso(epochMs: Long): String {
+        val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US).apply {
+            timeZone = TimeZone.getTimeZone("UTC")
+        }
+        return sdf.format(Date(epochMs))
+    }
+
     override fun onCleared() {
         super.onCleared()
         chatManager?.disconnect()
+        vodPollingJob?.cancel()
     }
 
     companion object {
         private const val TAG = "KyckStreamTV"
         private const val MAX_CHAT_MESSAGES = 200
+        private const val VOD_POLL_INTERVAL_MS = 5000L
     }
 }

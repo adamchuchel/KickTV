@@ -20,6 +20,7 @@ class KickAuthManager(context: Context) {
     private val client = OkHttpClient()
 
     private var pendingVerifier: String? = null
+    private var pendingState: String? = null
 
     fun isAuthenticated(): Boolean {
         val token = prefs.getString(KEY_ACCESS_TOKEN, null) ?: return false
@@ -33,6 +34,8 @@ class KickAuthManager(context: Context) {
     fun buildAuthUrl(): String {
         val verifier = generateCodeVerifier()
         pendingVerifier = verifier
+        val state = generateState()
+        pendingState = state
         val challenge = generateCodeChallenge(verifier)
         return "${Config.KICK_AUTH_URL}" +
             "?client_id=${Config.KICK_CLIENT_ID}" +
@@ -40,7 +43,8 @@ class KickAuthManager(context: Context) {
             "&response_type=code" +
             "&scope=${Config.KICK_OAUTH_SCOPES.replace(" ", "%20")}" +
             "&code_challenge=$challenge" +
-            "&code_challenge_method=S256"
+            "&code_challenge_method=S256" +
+            "&state=$state"
     }
 
     suspend fun exchangeCode(code: String): Boolean = withContext(Dispatchers.IO) {
@@ -49,6 +53,7 @@ class KickAuthManager(context: Context) {
             val body = FormBody.Builder()
                 .add("grant_type", "authorization_code")
                 .add("client_id", Config.KICK_CLIENT_ID)
+                .add("client_secret", Config.KICK_CLIENT_SECRET)
                 .add("code", code)
                 .add("redirect_uri", Config.KICK_REDIRECT_URI)
                 .add("code_verifier", verifier)
@@ -89,6 +94,7 @@ class KickAuthManager(context: Context) {
                 val body = FormBody.Builder()
                     .add("grant_type", "refresh_token")
                     .add("client_id", Config.KICK_CLIENT_ID)
+                    .add("client_secret", Config.KICK_CLIENT_SECRET)
                     .add("refresh_token", refreshToken)
                     .build()
                 val request = Request.Builder().url(Config.KICK_TOKEN_URL).post(body).build()
@@ -123,6 +129,12 @@ class KickAuthManager(context: Context) {
 
     private fun generateCodeVerifier(): String {
         val bytes = ByteArray(96)
+        SecureRandom().nextBytes(bytes)
+        return Base64.encodeToString(bytes, Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING)
+    }
+
+    private fun generateState(): String {
+        val bytes = ByteArray(16)
         SecureRandom().nextBytes(bytes)
         return Base64.encodeToString(bytes, Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING)
     }

@@ -16,7 +16,7 @@
         android:theme="@style/Theme.KickTV"
         android:usesCleartextTraffic="false">
 
-        <!-- Login screen — shown first if not authenticated -->
+        <!-- Login screen — entry point, redirects to HomeActivity if authenticated -->
         <activity
             android:name=".LoginActivity"
             android:exported="true"
@@ -28,11 +28,25 @@
             </intent-filter>
         </activity>
 
-        <!-- Channel input screen -->
+        <!-- Home screen with followed + popular rows -->
+        <activity
+            android:name=".HomeActivity"
+            android:exported="false"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.KickTV.Home" />
+
+        <!-- Manual channel search -->
         <activity
             android:name=".MainActivity"
             android:exported="false"
             android:label="@string/app_name" />
+
+        <!-- Channel detail page -->
+        <activity
+            android:name=".ChannelActivity"
+            android:exported="false"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.KickTV.Home" />
 
         <!-- Player + chat screen -->
         <activity

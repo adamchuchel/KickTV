@@ -23,8 +23,12 @@ data class Chatroom(
     @SerializedName("channel_id") val channelId: Int
 )
 
+data class PlaybackUrlResponse(val data: String?)
+
 data class LivestreamSummary(
     val id: Int,
     @SerializedName("session_title") val sessionTitle: String?,
-    @SerializedName("is_live") val isLive: Boolean
+    @SerializedName("is_live") val isLive: Boolean,
+    @SerializedName("viewer_count") val viewerCount: Int = 0,
+    val thumbnail: StreamThumbnail? = null
 )

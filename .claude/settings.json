@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//opt/homebrew/Cellar/openjdk/25.0.2/**)",
+      "Bash(/opt/homebrew/opt/java/bin/java -version)",
+      "Bash(\"/Applications/Android Studio.app/Contents/jbr/bin/java\" -version)",
+      "Bash(\"/Applications/Android Studio.app/Contents/jbr/Contents/Home/bin/java\" -version)",
+      "Bash(adb -s 192.168.3.16:5555 logcat -s KyckStreamTV:D)",
+      "Bash(curl -s \"https://kick.com/api/v2/channels/91445306/messages?start_time=2026-04-18+21:54:14\" -H \"Accept: application/json\")",
+      "Bash(curl -s 'https://kick.com/api/v2/channels/91445306/messages?start_time=2026-04-18+21:54:14' -H 'Accept: application/json' -H 'User-Agent: Mozilla/5.0 \\(Linux; Android 14; SHIELD Android TV\\) AppleWebKit/537.36')",
+      "Bash(adb -s 192.168.3.16:5555 logcat -s OkHttp:D -d)"
+    ]
+  }
+}
