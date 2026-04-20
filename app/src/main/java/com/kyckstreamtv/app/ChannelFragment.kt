@@ -49,6 +49,8 @@ class ChannelFragment : Fragment() {
     private lateinit var tvSessionTitle: TextView
     private lateinit var ivProfile: ImageView
     private lateinit var btnWatchLive: LinearLayout
+    private lateinit var btnFavorite: LinearLayout
+    private lateinit var tvFavoriteIcon: TextView
 
     private lateinit var rowsAdapter: ArrayObjectAdapter
     private var videosRowAdapter: ArrayObjectAdapter? = null
@@ -72,8 +74,11 @@ class ChannelFragment : Fragment() {
         tvSessionTitle = view.findViewById(R.id.tv_session_title)
         ivProfile = view.findViewById(R.id.iv_profile)
         btnWatchLive = view.findViewById(R.id.btn_watch_live)
+        btnFavorite = view.findViewById(R.id.btn_favorite)
+        tvFavoriteIcon = view.findViewById(R.id.tv_favorite_icon)
 
         btnWatchLive.setOnClickListener { openPlayer() }
+        btnFavorite.setOnClickListener { toggleFavorite() }
         btnWatchLive.setOnKeyListener { _, keyCode, event ->
             if (keyCode == KeyEvent.KEYCODE_DPAD_DOWN && event.action == KeyEvent.ACTION_DOWN) {
                 focusRows(); true
@@ -131,8 +136,32 @@ class ChannelFragment : Fragment() {
         }
     }
 
+    private fun updateFavoriteButton() {
+        val isFav = FavoritesRepository.isFavorite(slug)
+        tvFavoriteIcon.text = if (isFav) "★" else "☆"
+        tvFavoriteIcon.setTextColor(
+            if (isFav) requireContext().getColor(R.color.kick_green)
+            else requireContext().getColor(R.color.text_primary)
+        )
+    }
+
+    private fun toggleFavorite() {
+        val details = (viewModel.channelState.value as? ChannelState.Ready)?.details ?: return
+        if (FavoritesRepository.isFavorite(slug)) {
+            FavoritesRepository.remove(slug)
+        } else {
+            FavoritesRepository.add(FavoriteChannel(
+                slug = details.slug,
+                username = details.username,
+                profilePicUrl = details.profilePicUrl
+            ))
+        }
+        updateFavoriteButton()
+    }
+
     private fun updateHeader(details: ChannelDetails) {
         tvChannelName.text = details.username
+        updateFavoriteButton()
 
         if (details.isLive) {
             tvLiveDot.visibility = View.VISIBLE

@@ -12,5 +12,6 @@ class KyckStreamApp : Application() {
         super.onCreate()
         authManager = KickAuthManager(this)
         KickRepository.tokenProvider = { authManager.getAccessToken() }
+        FavoritesRepository.init(this)
     }
 }

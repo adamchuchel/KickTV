@@ -1,5 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<shape xmlns:android="http://schemas.android.com/apk/res/android"
-    android:shape="oval">
-    <solid android:color="#53FC18" />
-</shape>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Dark background circle -->
+    <path
+        android:fillColor="#0E0E10"
+        android:pathData="M0,0L108,0L108,108L0,108Z" />
+
+    <!-- "K" vertical bar -->
+    <path
+        android:fillColor="#53FC18"
+        android:pathData="M28,22L40,22L40,86L28,86Z" />
+
+    <!-- "K" top-right arm -->
+    <path
+        android:fillColor="#53FC18"
+        android:pathData="M40,54L72,22L84,22L52,54Z" />
+
+    <!-- "K" bottom-right arm -->
+    <path
+        android:fillColor="#53FC18"
+        android:pathData="M40,54L84,86L72,86L40,54Z" />
+
+</vector>

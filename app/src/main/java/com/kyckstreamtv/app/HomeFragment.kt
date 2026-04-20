@@ -35,6 +35,11 @@ class HomeFragment : BrowseSupportFragment() {
         searchAffordanceColor = requireContext().getColor(R.color.kick_green)
     }
 
+    override fun onResume() {
+        super.onResume()
+        showFavorites()
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -50,25 +55,43 @@ class HomeFragment : BrowseSupportFragment() {
             }
         }
 
+        // Favorites — loaded immediately from local storage, no network call
+        showFavorites()
+
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.liveFollowed.collect { cards ->
-                updateRow(0, getString(R.string.row_live_following), cards)
+                updateRow(1, getString(R.string.row_live_following), cards)
             }
         }
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.offlineFollowed.collect { cards ->
-                updateRow(1, getString(R.string.row_offline_following), cards)
+                updateRow(2, getString(R.string.row_offline_following), cards)
             }
         }
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.popular.collect { cards ->
-                updateRow(2, getString(R.string.row_popular), cards)
+                updateRow(3, getString(R.string.row_popular), cards)
             }
         }
 
         viewModel.load()
+    }
+
+    fun showFavorites() {
+        val cards = FavoritesRepository.getAll().map { fav ->
+            ChannelCard(
+                slug = fav.slug,
+                username = fav.username,
+                title = "",
+                viewerCount = 0,
+                thumbnailUrl = fav.profilePicUrl,
+                profilePicUrl = fav.profilePicUrl
+            )
+        }
+        if (cards.isEmpty()) return
+        updateRow(0, getString(R.string.row_favorites), cards)
     }
 
     private fun updateRow(sectionIndex: Int, title: String, cards: List<ChannelCard>) {

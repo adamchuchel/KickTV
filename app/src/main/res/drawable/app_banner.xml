@@ -1,15 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item>
-        <shape android:shape="rectangle">
-            <solid android:color="#0E0E10" />
-            <size android:width="320dp" android:height="180dp" />
-        </shape>
-    </item>
-    <item android:left="24dp" android:top="60dp" android:right="24dp" android:bottom="60dp">
-        <shape android:shape="rectangle">
-            <solid android:color="#53FC18" />
-            <corners android:radius="4dp" />
-        </shape>
-    </item>
-</layer-list>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="320dp"
+    android:height="180dp"
+    android:viewportWidth="320"
+    android:viewportHeight="180">
+
+    <!-- Dark background -->
+    <path
+        android:fillColor="#0E0E10"
+        android:pathData="M0,0L320,0L320,180L0,180Z" />
+
+    <!-- Green left accent stripe -->
+    <path
+        android:fillColor="#53FC18"
+        android:pathData="M0,0L8,0L8,180L0,180Z" />
+
+    <!-- Circle background for play button -->
+    <path
+        android:fillColor="#1A1A1A"
+        android:pathData="M90,90m-50,0a50,50 0 1,0 100,0a50,50 0 1,0 -100,0" />
+
+    <!-- Play triangle -->
+    <path
+        android:fillColor="#53FC18"
+        android:pathData="M78,68L78,112L118,90Z" />
+
+    <!-- "K" letter - vertical bar -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M168,45L180,45L180,135L168,135Z" />
+
+    <!-- "K" top-right arm -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M180,90L215,45L230,45L195,90Z" />
+
+    <!-- "K" bottom-right arm -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M180,90L230,135L215,135L180,90Z" />
+
+    <!-- "Stream" dots / subtitle line -->
+    <path
+        android:fillColor="#53FC18"
+        android:pathData="M245,80L310,80L310,84L245,84Z" />
+    <path
+        android:fillColor="#53FC18"
+        android:pathData="M245,88L295,88L295,92L245,92Z" />
+    <path
+        android:fillColor="#53FC18"
+        android:pathData="M245,96L305,96L305,100L245,100Z" />
+
+    <!-- Bottom green accent line -->
+    <path
+        android:fillColor="#53FC18"
+        android:pathData="M0,172L320,172L320,180L0,180Z" />
+
+</vector>

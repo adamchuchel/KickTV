@@ -76,6 +76,28 @@
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/btn_favorite"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:layout_marginEnd="8dp"
+            android:background="@drawable/btn_player_selector"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:nextFocusDown="@+id/rows_container"
+            android:nextFocusRight="@+id/btn_watch_live"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tv_favorite_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="☆"
+                android:textColor="@color/text_primary"
+                android:textSize="22sp" />
+        </LinearLayout>
+
+        <LinearLayout
             android:id="@+id/btn_watch_live"
             android:layout_width="140dp"
             android:layout_height="44dp"
@@ -84,6 +106,7 @@
             android:focusable="true"
             android:gravity="center"
             android:nextFocusDown="@+id/rows_container"
+            android:nextFocusLeft="@+id/btn_favorite"
             android:orientation="vertical"
             android:visibility="gone">
 
