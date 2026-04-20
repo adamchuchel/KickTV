@@ -91,344 +91,148 @@
             android:scrollbars="none" />
     </FrameLayout>
 
-    <!-- Bottom bar: channel info + all controls (MENU/DOWN to toggle) -->
+    <!-- Compact settings bar (DOWN to open, BACK to close) -->
     <LinearLayout
         android:id="@+id/bottom_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:background="#F2000000"
+        android:background="#F0000000"
         android:orientation="vertical"
-        android:padding="12dp"
+        android:paddingBottom="10dp"
+        android:paddingEnd="20dp"
+        android:paddingStart="20dp"
+        android:paddingTop="8dp"
         android:visibility="gone">
 
-        <!-- Row 1: channel info + action buttons -->
+        <!-- Channel info row -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:paddingBottom="6dp">
 
-            <LinearLayout
+            <TextView
+                android:id="@+id/tv_channel_name"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:orientation="vertical">
+                android:textColor="@color/text_primary"
+                android:textSize="15sp"
+                android:textStyle="bold" />
 
-                <TextView
-                    android:id="@+id/tv_channel_name"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="@color/text_primary"
-                    android:textSize="20sp"
-                    android:textStyle="bold" />
+            <TextView
+                android:id="@+id/tv_game_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/text_secondary"
+                android:textSize="12sp" />
 
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:orientation="horizontal">
+            <TextView
+                android:id="@+id/tv_viewers"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:textColor="@color/kick_green"
+                android:textSize="12sp" />
+        </LinearLayout>
 
-                    <TextView
-                        android:id="@+id/tv_game_name"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="13sp" />
+        <!-- Settings chips -->
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scrollbars="none">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="  •  "
-                        android:textColor="@color/text_secondary"
-                        android:textSize="13sp" />
-
-                    <TextView
-                        android:id="@+id/tv_viewers"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/kick_green"
-                        android:textSize="13sp" />
-                </LinearLayout>
-            </LinearLayout>
-
-            <!-- Buttons -->
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:gravity="center_vertical"
                 android:orientation="horizontal">
 
-                <LinearLayout
-                    android:id="@+id/btn_quality"
-                    android:layout_width="100dp"
-                    android:layout_height="52dp"
-                    android:layout_marginEnd="8dp"
-                    android:background="@drawable/btn_player_selector"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:gravity="center"
-                    android:nextFocusDown="@+id/seeker_opacity"
-                    android:nextFocusRight="@+id/btn_chat_toggle"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:id="@+id/tv_quality"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Auto"
-                        android:textColor="@color/text_primary"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Kvalita"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="11sp" />
+                <LinearLayout android:id="@+id/chip_chat" style="@style/SettingChip">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="Chat" android:textColor="@color/text_secondary" android:textSize="10sp" />
+                    <TextView android:id="@+id/val_chat" android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" android:text="ON"
+                        android:textColor="@color/kick_green" android:textSize="14sp" android:textStyle="bold" />
                 </LinearLayout>
 
-                <LinearLayout
-                    android:id="@+id/btn_chat_toggle"
-                    android:layout_width="100dp"
-                    android:layout_height="52dp"
-                    android:layout_marginEnd="8dp"
-                    android:background="@drawable/btn_player_selector"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:gravity="center"
-                    android:nextFocusDown="@+id/seeker_opacity"
-                    android:nextFocusLeft="@+id/btn_quality"
-                    android:nextFocusRight="@+id/btn_side"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:id="@+id/tv_chat_on_off"
-                        android:layout_width="wrap_content"
+                <LinearLayout android:id="@+id/chip_opacity" style="@style/SettingChip">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="Průhlednost" android:textColor="@color/text_secondary" android:textSize="10sp" />
+                    <TextView android:id="@+id/val_opacity" android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="ON"
-                        android:textColor="@color/kick_green"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Chat"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="11sp" />
+                        android:textColor="@color/text_primary" android:textSize="14sp" android:textStyle="bold" />
                 </LinearLayout>
 
-                <LinearLayout
-                    android:id="@+id/btn_h_pos"
-                    android:layout_width="90dp"
-                    android:layout_height="52dp"
-                    android:layout_marginEnd="8dp"
-                    android:background="@drawable/btn_player_selector"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:gravity="center"
-                    android:nextFocusDown="@+id/seeker_opacity"
-                    android:nextFocusLeft="@+id/btn_chat_toggle"
-                    android:nextFocusRight="@+id/btn_v_pos"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:id="@+id/tv_h_pos"
-                        android:layout_width="wrap_content"
+                <LinearLayout android:id="@+id/chip_width" style="@style/SettingChip">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="Šířka chatu" android:textColor="@color/text_secondary" android:textSize="10sp" />
+                    <TextView android:id="@+id/val_width" android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="→ Vpravo"
-                        android:textColor="@color/text_primary"
-                        android:textSize="12sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="H pozice"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="11sp" />
+                        android:textColor="@color/text_primary" android:textSize="14sp" android:textStyle="bold" />
                 </LinearLayout>
 
-                <LinearLayout
-                    android:id="@+id/btn_v_pos"
-                    android:layout_width="90dp"
-                    android:layout_height="52dp"
-                    android:background="@drawable/btn_player_selector"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:gravity="center"
-                    android:nextFocusDown="@+id/seeker_opacity"
-                    android:nextFocusLeft="@+id/btn_h_pos"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:id="@+id/tv_v_pos"
-                        android:layout_width="wrap_content"
+                <LinearLayout android:id="@+id/chip_height" style="@style/SettingChip">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="Výška chatu" android:textColor="@color/text_secondary" android:textSize="10sp" />
+                    <TextView android:id="@+id/val_height" android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="↓ Dole"
-                        android:textColor="@color/text_primary"
-                        android:textSize="12sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="V pozice"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="11sp" />
+                        android:textColor="@color/text_primary" android:textSize="14sp" android:textStyle="bold" />
                 </LinearLayout>
+
+                <LinearLayout android:id="@+id/chip_font" style="@style/SettingChip">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="Písmo" android:textColor="@color/text_secondary" android:textSize="10sp" />
+                    <TextView android:id="@+id/val_font" android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/text_primary" android:textSize="14sp" android:textStyle="bold" />
+                </LinearLayout>
+
+                <LinearLayout android:id="@+id/chip_hpos" style="@style/SettingChip">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="H pozice" android:textColor="@color/text_secondary" android:textSize="10sp" />
+                    <TextView android:id="@+id/val_hpos" android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/text_primary" android:textSize="14sp" android:textStyle="bold" />
+                </LinearLayout>
+
+                <LinearLayout android:id="@+id/chip_vpos" style="@style/SettingChip">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="V pozice" android:textColor="@color/text_secondary" android:textSize="10sp" />
+                    <TextView android:id="@+id/val_vpos" android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/text_primary" android:textSize="14sp" android:textStyle="bold" />
+                </LinearLayout>
+
+                <LinearLayout android:id="@+id/chip_quality" style="@style/SettingChip">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="Kvalita" android:textColor="@color/text_secondary" android:textSize="10sp" />
+                    <TextView android:id="@+id/val_quality" android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" android:text="Auto"
+                        android:textColor="@color/text_primary" android:textSize="14sp" android:textStyle="bold" />
+                </LinearLayout>
+
+                <!-- Chat delay — only shown for live streams -->
+                <LinearLayout android:id="@+id/chip_delay" style="@style/SettingChip"
+                    android:visibility="gone">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="Zpoždění chatu" android:textColor="@color/text_secondary" android:textSize="10sp" />
+                    <TextView android:id="@+id/val_delay" android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/text_primary" android:textSize="14sp" android:textStyle="bold" />
+                </LinearLayout>
+
             </LinearLayout>
-        </LinearLayout>
+        </HorizontalScrollView>
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_marginBottom="6dp"
-            android:layout_marginTop="6dp"
-            android:background="#44FFFFFF" />
-
-        <!-- Seekbar rows: UP/DOWN navigates between them, LEFT/RIGHT adjusts value -->
-
-        <!-- Opacity -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="44dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="160dp"
-                android:layout_height="wrap_content"
-                android:text="Průhlednost pozadí"
-                android:textColor="@color/text_secondary"
-                android:textSize="12sp" />
-
-            <SeekBar
-                android:id="@+id/seeker_opacity"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:focusable="true"
-                android:max="100"
-                android:nextFocusDown="@+id/seeker_width"
-                android:nextFocusUp="@+id/btn_quality"
-                android:progressTint="@color/kick_green"
-                android:thumbTint="@color/kick_green" />
-
-            <TextView
-                android:id="@+id/tv_opacity_val"
-                android:layout_width="55dp"
-                android:layout_height="wrap_content"
-                android:gravity="end"
-                android:textColor="@color/text_primary"
-                android:textSize="12sp" />
-        </LinearLayout>
-
-        <!-- Width -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="44dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="160dp"
-                android:layout_height="wrap_content"
-                android:text="Šířka chatu"
-                android:textColor="@color/text_secondary"
-                android:textSize="12sp" />
-
-            <SeekBar
-                android:id="@+id/seeker_width"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:focusable="true"
-                android:max="35"
-                android:nextFocusDown="@+id/seeker_height"
-                android:nextFocusUp="@+id/seeker_opacity"
-                android:progressTint="@color/kick_green"
-                android:thumbTint="@color/kick_green" />
-
-            <TextView
-                android:id="@+id/tv_width_val"
-                android:layout_width="55dp"
-                android:layout_height="wrap_content"
-                android:gravity="end"
-                android:textColor="@color/text_primary"
-                android:textSize="12sp" />
-        </LinearLayout>
-
-        <!-- Height -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="44dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="160dp"
-                android:layout_height="wrap_content"
-                android:text="Výška chatu"
-                android:textColor="@color/text_secondary"
-                android:textSize="12sp" />
-
-            <SeekBar
-                android:id="@+id/seeker_height"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:focusable="true"
-                android:max="90"
-                android:nextFocusDown="@+id/seeker_font"
-                android:nextFocusUp="@+id/seeker_width"
-                android:progressTint="@color/kick_green"
-                android:thumbTint="@color/kick_green" />
-
-            <TextView
-                android:id="@+id/tv_height_val"
-                android:layout_width="55dp"
-                android:layout_height="wrap_content"
-                android:gravity="end"
-                android:textColor="@color/text_primary"
-                android:textSize="12sp" />
-        </LinearLayout>
-
-        <!-- Font size -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="44dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="160dp"
-                android:layout_height="wrap_content"
-                android:text="Velikost písma"
-                android:textColor="@color/text_secondary"
-                android:textSize="12sp" />
-
-            <SeekBar
-                android:id="@+id/seeker_font"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:focusable="true"
-                android:max="10"
-                android:nextFocusUp="@+id/seeker_height"
-                android:progressTint="@color/kick_green"
-                android:thumbTint="@color/kick_green" />
-
-            <TextView
-                android:id="@+id/tv_font_val"
-                android:layout_width="55dp"
-                android:layout_height="wrap_content"
-                android:gravity="end"
-                android:textColor="@color/text_primary"
-                android:textSize="12sp" />
-        </LinearLayout>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="↑↓ hodnota  •  ←→ přepnout  •  BACK zavřít"
+            android:textColor="#55FFFFFF"
+            android:textSize="9sp" />
 
     </LinearLayout>
 

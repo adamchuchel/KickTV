@@ -38,6 +38,7 @@ class PlayerViewModel : ViewModel() {
 
     private var chatManager: KickChatManager? = null
     private var vodPollingJob: Job? = null
+    var chatDelayMs: Long = 0L
 
     // VOD state
     private var isVodMode = false
@@ -170,8 +171,17 @@ class PlayerViewModel : ViewModel() {
         chatManager = KickChatManager(
             chatroomId = chatroomId,
             onMessage = { message ->
-                val updated = (_chatMessages.value + message).takeLast(MAX_CHAT_MESSAGES)
-                _chatMessages.value = updated
+                val delayMs = chatDelayMs
+                if (delayMs <= 0L) {
+                    val updated = (_chatMessages.value + message).takeLast(MAX_CHAT_MESSAGES)
+                    _chatMessages.value = updated
+                } else {
+                    viewModelScope.launch {
+                        delay(delayMs)
+                        val updated = (_chatMessages.value + message).takeLast(MAX_CHAT_MESSAGES)
+                        _chatMessages.value = updated
+                    }
+                }
             },
             onConnectionStateChange = { connected ->
                 _chatConnected.value = connected

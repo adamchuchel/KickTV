@@ -37,6 +37,11 @@ class PlayerPrefs(context: Context) {
         get() = prefs.getInt("chat_v_pos", 2)
         set(v) { prefs.edit().putInt("chat_v_pos", v.coerceIn(0, 2)).apply() }
 
+    // Chat delay for live streams: 0–30 seconds
+    var chatDelaySeconds: Int
+        get() = prefs.getInt("chat_delay_s", 0)
+        set(v) { prefs.edit().putInt("chat_delay_s", v.coerceIn(0, 30)).apply() }
+
     val chatAlpha: Float get() = chatOpacityProgress / 100f
     val chatWidthPercent: Int get() = 15 + chatWidthProgress
     val chatHeightPercent: Int get() = 10 + chatHeightProgress

@@ -9,7 +9,6 @@ import android.view.KeyEvent
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
-import android.widget.SeekBar
 import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -27,7 +26,6 @@ import com.kyckstreamtv.app.ui.ChatAdapter
 import com.kyckstreamtv.app.viewmodel.PlayerState
 import com.kyckstreamtv.app.viewmodel.PlayerViewModel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class PlayerActivity : AppCompatActivity() {
@@ -51,23 +49,30 @@ class PlayerActivity : AppCompatActivity() {
     private lateinit var progressBar: View
     private lateinit var tvStatus: TextView
     private lateinit var bottomBar: View
-
-    // Bottom bar views
     private lateinit var tvChannelName: TextView
     private lateinit var tvGameName: TextView
     private lateinit var tvViewers: TextView
-    private lateinit var tvQuality: TextView
-    private lateinit var tvChatOnOff: TextView
-    private lateinit var tvHPos: TextView
-    private lateinit var tvVPos: TextView
-    private lateinit var tvOpacityVal: TextView
-    private lateinit var tvWidthVal: TextView
-    private lateinit var tvHeightVal: TextView
-    private lateinit var tvFontVal: TextView
-    private lateinit var seekerOpacity: SeekBar
-    private lateinit var seekerWidth: SeekBar
-    private lateinit var seekerHeight: SeekBar
-    private lateinit var seekerFont: SeekBar
+
+    // Settings chips
+    private lateinit var chipChat: LinearLayout
+    private lateinit var chipOpacity: LinearLayout
+    private lateinit var chipWidth: LinearLayout
+    private lateinit var chipHeight: LinearLayout
+    private lateinit var chipFont: LinearLayout
+    private lateinit var chipHPos: LinearLayout
+    private lateinit var chipVPos: LinearLayout
+    private lateinit var chipQuality: LinearLayout
+    private lateinit var chipDelay: LinearLayout
+
+    private lateinit var valChat: TextView
+    private lateinit var valOpacity: TextView
+    private lateinit var valWidth: TextView
+    private lateinit var valHeight: TextView
+    private lateinit var valFont: TextView
+    private lateinit var valHPos: TextView
+    private lateinit var valVPos: TextView
+    private lateinit var valQuality: TextView
+    private lateinit var valDelay: TextView
 
     private lateinit var player: ExoPlayer
     private lateinit var chatAdapter: ChatAdapter
@@ -85,7 +90,6 @@ class PlayerActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-
         @Suppress("DEPRECATION")
         window.decorView.systemUiVisibility = (
             View.SYSTEM_UI_FLAG_FULLSCREEN or
@@ -100,42 +104,46 @@ class PlayerActivity : AppCompatActivity() {
 
         val channelName = if (!isVodMode) {
             intent.getStringExtra(EXTRA_CHANNEL) ?: run { finish(); return }
-        } else {
-            ""
-        }
+        } else ""
 
         prefs = PlayerPrefs(this)
 
-        playerView = findViewById(R.id.player_view)
-        chatContainer = findViewById(R.id.chat_container)
-        rvChat = findViewById(R.id.rv_chat)
-        progressBar = findViewById(R.id.progress_bar)
-        tvStatus = findViewById(R.id.tv_status)
-        bottomBar = findViewById(R.id.bottom_bar)
-
-        seekOverlay = findViewById(R.id.seek_overlay)
-        tvSeekDirection = findViewById(R.id.tv_seek_direction)
+        playerView     = findViewById(R.id.player_view)
+        chatContainer  = findViewById(R.id.chat_container)
+        rvChat         = findViewById(R.id.rv_chat)
+        progressBar    = findViewById(R.id.progress_bar)
+        tvStatus       = findViewById(R.id.tv_status)
+        bottomBar      = findViewById(R.id.bottom_bar)
+        tvChannelName  = findViewById(R.id.tv_channel_name)
+        tvGameName     = findViewById(R.id.tv_game_name)
+        tvViewers      = findViewById(R.id.tv_viewers)
+        seekOverlay    = findViewById(R.id.seek_overlay)
+        tvSeekDirection= findViewById(R.id.tv_seek_direction)
         tvSeekPosition = findViewById(R.id.tv_seek_position)
 
-        tvChannelName = findViewById(R.id.tv_channel_name)
-        tvGameName = findViewById(R.id.tv_game_name)
-        tvViewers = findViewById(R.id.tv_viewers)
-        tvQuality = findViewById(R.id.tv_quality)
-        tvChatOnOff = findViewById(R.id.tv_chat_on_off)
-        tvHPos = findViewById(R.id.tv_h_pos)
-        tvVPos = findViewById(R.id.tv_v_pos)
-        tvOpacityVal = findViewById(R.id.tv_opacity_val)
-        tvWidthVal = findViewById(R.id.tv_width_val)
-        tvHeightVal = findViewById(R.id.tv_height_val)
-        tvFontVal = findViewById(R.id.tv_font_val)
-        seekerOpacity = findViewById(R.id.seeker_opacity)
-        seekerWidth = findViewById(R.id.seeker_width)
-        seekerHeight = findViewById(R.id.seeker_height)
-        seekerFont = findViewById(R.id.seeker_font)
+        chipChat    = findViewById(R.id.chip_chat)
+        chipOpacity = findViewById(R.id.chip_opacity)
+        chipWidth   = findViewById(R.id.chip_width)
+        chipHeight  = findViewById(R.id.chip_height)
+        chipFont    = findViewById(R.id.chip_font)
+        chipHPos    = findViewById(R.id.chip_hpos)
+        chipVPos    = findViewById(R.id.chip_vpos)
+        chipQuality = findViewById(R.id.chip_quality)
+        chipDelay   = findViewById(R.id.chip_delay)
+
+        valChat    = findViewById(R.id.val_chat)
+        valOpacity = findViewById(R.id.val_opacity)
+        valWidth   = findViewById(R.id.val_width)
+        valHeight  = findViewById(R.id.val_height)
+        valFont    = findViewById(R.id.val_font)
+        valHPos    = findViewById(R.id.val_hpos)
+        valVPos    = findViewById(R.id.val_vpos)
+        valQuality = findViewById(R.id.val_quality)
+        valDelay   = findViewById(R.id.val_delay)
 
         setupPlayer()
         setupChat()
-        setupBottomBar()
+        setupChips()
         applyPrefs()
         observeViewModel()
 
@@ -146,6 +154,9 @@ class PlayerActivity : AppCompatActivity() {
             val title = intent.getStringExtra(EXTRA_TITLE) ?: ""
             viewModel.loadVod(url, startTime, chatroomId, title)
         } else {
+            // Show delay chip only for live
+            chipDelay.visibility = View.VISIBLE
+            viewModel.chatDelayMs = prefs.chatDelaySeconds * 1000L
             viewModel.loadChannel(channelName)
         }
     }
@@ -159,11 +170,10 @@ class PlayerActivity : AppCompatActivity() {
             override fun onPlayerError(error: PlaybackException) {
                 showStatusText("Chyba přehrávání: ${error.message}")
             }
-
             override fun onPlaybackStateChanged(state: Int) {
                 when (state) {
                     Player.STATE_BUFFERING -> progressBar.visibility = View.VISIBLE
-                    Player.STATE_READY -> progressBar.visibility = View.GONE
+                    Player.STATE_READY     -> progressBar.visibility = View.GONE
                     else -> {}
                 }
             }
@@ -174,101 +184,83 @@ class PlayerActivity : AppCompatActivity() {
         chatAdapter = ChatAdapter()
         rvChat.adapter = chatAdapter
         rvChat.itemAnimator = null
-        rvChat.layoutManager = LinearLayoutManager(this).apply {
-            stackFromEnd = true
-        }
+        rvChat.layoutManager = LinearLayoutManager(this).apply { stackFromEnd = true }
     }
 
-    private fun setupBottomBar() {
-        // Quality button
-        findViewById<LinearLayout>(R.id.btn_quality).setOnClickListener { showQualityDialog() }
+    // ── Settings chips ──────────────────────────────────────────────────────
 
-        // Chat toggle
-        findViewById<LinearLayout>(R.id.btn_chat_toggle).setOnClickListener { toggleChat() }
+    private fun setupChips() {
+        attachChipKeys(chipChat,
+            onUp   = { toggleChat() },
+            onDown = { toggleChat() },
+            onSelect = { toggleChat() }
+        )
+        attachChipKeys(chipOpacity,
+            onUp   = { prefs.chatOpacityProgress = (prefs.chatOpacityProgress + 5).coerceAtMost(100); applyChatBackground(); refreshChipValues() },
+            onDown = { prefs.chatOpacityProgress = (prefs.chatOpacityProgress - 5).coerceAtLeast(0);  applyChatBackground(); refreshChipValues() }
+        )
+        attachChipKeys(chipWidth,
+            onUp   = { prefs.chatWidthProgress = (prefs.chatWidthProgress + 1).coerceAtMost(35); applyChatLayout(); refreshChipValues() },
+            onDown = { prefs.chatWidthProgress = (prefs.chatWidthProgress - 1).coerceAtLeast(0); applyChatLayout(); refreshChipValues() }
+        )
+        attachChipKeys(chipHeight,
+            onUp   = { prefs.chatHeightProgress = (prefs.chatHeightProgress + 2).coerceAtMost(90); applyChatLayout(); refreshChipValues() },
+            onDown = { prefs.chatHeightProgress = (prefs.chatHeightProgress - 2).coerceAtLeast(0); applyChatLayout(); refreshChipValues() }
+        )
+        attachChipKeys(chipFont,
+            onUp   = { prefs.chatFontProgress = (prefs.chatFontProgress + 1).coerceAtMost(10); chatAdapter.setFontSize(prefs.chatFontSizeSp); refreshChipValues() },
+            onDown = { prefs.chatFontProgress = (prefs.chatFontProgress - 1).coerceAtLeast(0); chatAdapter.setFontSize(prefs.chatFontSizeSp); refreshChipValues() }
+        )
+        attachChipKeys(chipHPos,
+            onUp   = { prefs.chatHPos = (prefs.chatHPos + 1) % 3; applyChatLayout(); refreshChipValues() },
+            onDown = { prefs.chatHPos = (prefs.chatHPos + 2) % 3; applyChatLayout(); refreshChipValues() }
+        )
+        attachChipKeys(chipVPos,
+            onUp   = { prefs.chatVPos = (prefs.chatVPos + 2) % 3; applyChatLayout(); refreshChipValues() },
+            onDown = { prefs.chatVPos = (prefs.chatVPos + 1) % 3; applyChatLayout(); refreshChipValues() }
+        )
+        attachChipKeys(chipQuality,
+            onUp = {}, onDown = {},
+            onSelect = { showQualityDialog() }
+        )
+        attachChipKeys(chipDelay,
+            onUp   = { prefs.chatDelaySeconds = (prefs.chatDelaySeconds + 1).coerceAtMost(30); viewModel.chatDelayMs = prefs.chatDelaySeconds * 1000L; refreshChipValues() },
+            onDown = { prefs.chatDelaySeconds = (prefs.chatDelaySeconds - 1).coerceAtLeast(0); viewModel.chatDelayMs = prefs.chatDelaySeconds * 1000L; refreshChipValues() }
+        )
+    }
 
-        // Horizontal position: cycles left → center → right
-        findViewById<LinearLayout>(R.id.btn_h_pos).setOnClickListener {
-            prefs.chatHPos = (prefs.chatHPos + 1) % 3
-            applyChatLayout()
-            updatePositionLabels()
+    private fun attachChipKeys(chip: LinearLayout, onUp: () -> Unit, onDown: () -> Unit, onSelect: (() -> Unit)? = null) {
+        chip.setOnKeyListener { _, keyCode, event ->
+            if (event.action != KeyEvent.ACTION_DOWN) return@setOnKeyListener false
+            when (keyCode) {
+                KeyEvent.KEYCODE_DPAD_UP     -> { onUp(); true }
+                KeyEvent.KEYCODE_DPAD_DOWN   -> { onDown(); true }
+                KeyEvent.KEYCODE_DPAD_CENTER,
+                KeyEvent.KEYCODE_ENTER       -> { onSelect?.invoke(); true }
+                else -> false
+            }
         }
-
-        // Vertical position: cycles top → middle → bottom
-        findViewById<LinearLayout>(R.id.btn_v_pos).setOnClickListener {
-            prefs.chatVPos = (prefs.chatVPos + 1) % 3
-            applyChatLayout()
-            updatePositionLabels()
-        }
-
-        // Opacity seekbar
-        seekerOpacity.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(sb: SeekBar, p: Int, fromUser: Boolean) {
-                if (fromUser) {
-                    prefs.chatOpacityProgress = p
-                    applyChatBackground()
-                    tvOpacityVal.text = "${prefs.chatAlpha.times(100).toInt()}%"
-                }
-            }
-            override fun onStartTrackingTouch(sb: SeekBar) {}
-            override fun onStopTrackingTouch(sb: SeekBar) {}
-        })
-
-        // Width seekbar
-        seekerWidth.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(sb: SeekBar, p: Int, fromUser: Boolean) {
-                if (fromUser) {
-                    prefs.chatWidthProgress = p
-                    applyChatLayout()
-                    tvWidthVal.text = "${prefs.chatWidthPercent}%"
-                }
-            }
-            override fun onStartTrackingTouch(sb: SeekBar) {}
-            override fun onStopTrackingTouch(sb: SeekBar) {}
-        })
-
-        // Height seekbar
-        seekerHeight.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(sb: SeekBar, p: Int, fromUser: Boolean) {
-                if (fromUser) {
-                    prefs.chatHeightProgress = p
-                    applyChatLayout()
-                    tvHeightVal.text = "${prefs.chatHeightPercent}%"
-                }
-            }
-            override fun onStartTrackingTouch(sb: SeekBar) {}
-            override fun onStopTrackingTouch(sb: SeekBar) {}
-        })
-
-        // Font seekbar
-        seekerFont.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(sb: SeekBar, p: Int, fromUser: Boolean) {
-                if (fromUser) {
-                    prefs.chatFontProgress = p
-                    chatAdapter.setFontSize(prefs.chatFontSizeSp)
-                    tvFontVal.text = "${prefs.chatFontSizeSp.toInt()}sp"
-                }
-            }
-            override fun onStartTrackingTouch(sb: SeekBar) {}
-            override fun onStopTrackingTouch(sb: SeekBar) {}
-        })
+        chip.setOnClickListener { onSelect?.invoke() }
     }
 
     private fun applyPrefs() {
-        seekerOpacity.progress = prefs.chatOpacityProgress
-        seekerWidth.progress = prefs.chatWidthProgress
-        seekerHeight.progress = prefs.chatHeightProgress
-        seekerFont.progress = prefs.chatFontProgress
-
-        tvOpacityVal.text = "${prefs.chatAlpha.times(100).toInt()}%"
-        tvWidthVal.text = "${prefs.chatWidthPercent}%"
-        tvHeightVal.text = "${prefs.chatHeightPercent}%"
-        tvFontVal.text = "${prefs.chatFontSizeSp.toInt()}sp"
-
+        viewModel.chatDelayMs = prefs.chatDelaySeconds * 1000L
+        refreshChipValues()
         applyChatBackground()
         chatAdapter.setFontSize(prefs.chatFontSizeSp)
-        updatePositionLabels()
-
         chatContainer.post { applyChatLayout() }
+    }
+
+    private fun refreshChipValues() {
+        valChat.text    = if (chatVisible) "ON" else "OFF"
+        valChat.setTextColor(if (chatVisible) getColor(R.color.kick_green) else getColor(R.color.text_secondary))
+        valOpacity.text = "${prefs.chatAlpha.times(100).toInt()}%"
+        valWidth.text   = "${prefs.chatWidthPercent}%"
+        valHeight.text  = "${prefs.chatHeightPercent}%"
+        valFont.text    = "${prefs.chatFontSizeSp.toInt()}sp"
+        valHPos.text    = when (prefs.chatHPos) { 0 -> "← Vlevo"; 1 -> "— Střed"; else -> "→ Vpravo" }
+        valVPos.text    = when (prefs.chatVPos) { 0 -> "↑ Nahoře"; 1 -> "↕ Střed"; else -> "↓ Dole" }
+        valDelay.text   = if (prefs.chatDelaySeconds == 0) "0s (vypnuto)" else "${prefs.chatDelaySeconds}s"
     }
 
     private fun applyChatBackground() {
@@ -277,47 +269,31 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     private fun applyChatLayout() {
-        val screenWidth = resources.displayMetrics.widthPixels
+        val screenWidth  = resources.displayMetrics.widthPixels
         val screenHeight = resources.displayMetrics.heightPixels
-
         val params = chatContainer.layoutParams as RelativeLayout.LayoutParams
-        params.width = screenWidth * prefs.chatWidthPercent / 100
+        params.width  = screenWidth  * prefs.chatWidthPercent  / 100
         params.height = screenHeight * prefs.chatHeightPercent / 100
-
-        // Clear all positioning rules
         params.removeRule(RelativeLayout.ALIGN_PARENT_START)
         params.removeRule(RelativeLayout.ALIGN_PARENT_END)
         params.removeRule(RelativeLayout.CENTER_HORIZONTAL)
         params.removeRule(RelativeLayout.ALIGN_PARENT_TOP)
         params.removeRule(RelativeLayout.ALIGN_PARENT_BOTTOM)
         params.removeRule(RelativeLayout.CENTER_VERTICAL)
-
         when (prefs.chatHPos) {
-            0 -> params.addRule(RelativeLayout.ALIGN_PARENT_START)
-            1 -> params.addRule(RelativeLayout.CENTER_HORIZONTAL)
+            0    -> params.addRule(RelativeLayout.ALIGN_PARENT_START)
+            1    -> params.addRule(RelativeLayout.CENTER_HORIZONTAL)
             else -> params.addRule(RelativeLayout.ALIGN_PARENT_END)
         }
         when (prefs.chatVPos) {
-            0 -> params.addRule(RelativeLayout.ALIGN_PARENT_TOP)
-            1 -> params.addRule(RelativeLayout.CENTER_VERTICAL)
+            0    -> params.addRule(RelativeLayout.ALIGN_PARENT_TOP)
+            1    -> params.addRule(RelativeLayout.CENTER_VERTICAL)
             else -> params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM)
         }
-
         chatContainer.layoutParams = params
     }
 
-    private fun updatePositionLabels() {
-        tvHPos.text = when (prefs.chatHPos) {
-            0 -> "← Vlevo"
-            1 -> "— Střed"
-            else -> "→ Vpravo"
-        }
-        tvVPos.text = when (prefs.chatVPos) {
-            0 -> "↑ Nahoře"
-            1 -> "↕ Střed"
-            else -> "↓ Dole"
-        }
-    }
+    // ── ViewModel observation ────────────────────────────────────────────────
 
     private fun observeViewModel() {
         lifecycleScope.launch {
@@ -339,7 +315,7 @@ class PlayerActivity : AppCompatActivity() {
                         }
                     }
                     is PlayerState.Offline -> showStatusText(getString(R.string.msg_channel_offline))
-                    is PlayerState.Error -> showStatusText(state.message)
+                    is PlayerState.Error   -> showStatusText(state.message)
                 }
             }
         }
@@ -347,9 +323,7 @@ class PlayerActivity : AppCompatActivity() {
         lifecycleScope.launch {
             viewModel.chatMessages.collect { messages ->
                 chatAdapter.setMessages(messages)
-                if (messages.isNotEmpty()) {
-                    rvChat.scrollToPosition(messages.size - 1)
-                }
+                if (messages.isNotEmpty()) rvChat.scrollToPosition(messages.size - 1)
             }
         }
     }
@@ -379,11 +353,7 @@ class PlayerActivity : AppCompatActivity() {
     private fun toggleChat() {
         chatVisible = !chatVisible
         chatContainer.visibility = if (chatVisible) View.VISIBLE else View.GONE
-        tvChatOnOff.text = if (chatVisible) "ON" else "OFF"
-        tvChatOnOff.setTextColor(
-            if (chatVisible) getColor(R.color.kick_green)
-            else getColor(R.color.text_secondary)
-        )
+        refreshChipValues()
     }
 
     private fun showQualityDialog() {
@@ -391,59 +361,44 @@ class PlayerActivity : AppCompatActivity() {
         val videoGroup = tracks.groups.firstOrNull {
             it.type == C.TRACK_TYPE_VIDEO && it.isSupported
         } ?: run {
-            AlertDialog.Builder(this)
-                .setTitle("Kvalita")
-                .setMessage("Žádné stopy k dispozici")
-                .setPositiveButton("OK", null)
-                .show()
+            AlertDialog.Builder(this).setTitle("Kvalita")
+                .setMessage("Žádné stopy k dispozici").setPositiveButton("OK", null).show()
             return
         }
 
         val labels = mutableListOf("Auto (adaptivní)")
-        val overrides = mutableListOf<TrackSelectionOverride?>()
-        overrides.add(null)
-
+        val overrides = mutableListOf<TrackSelectionOverride?>(null)
         for (i in 0 until videoGroup.length) {
-            val format = videoGroup.getTrackFormat(i)
-            val label = when {
-                format.height > 0 -> "${format.height}p"
-                format.bitrate > 0 -> "${format.bitrate / 1000} kbps"
-                else -> "Stopa $i"
-            }
-            labels.add(label)
+            val fmt = videoGroup.getTrackFormat(i)
+            labels.add(if (fmt.height > 0) "${fmt.height}p" else if (fmt.bitrate > 0) "${fmt.bitrate / 1000} kbps" else "Stopa $i")
             overrides.add(TrackSelectionOverride(videoGroup.mediaTrackGroup, i))
         }
 
-        AlertDialog.Builder(this)
-            .setTitle("Kvalita streamu")
+        AlertDialog.Builder(this).setTitle("Kvalita streamu")
             .setItems(labels.toTypedArray()) { _, which ->
                 val override = overrides[which]
                 player.trackSelectionParameters = if (override == null) {
                     player.trackSelectionParameters.buildUpon()
-                        .clearVideoSizeConstraints()
-                        .clearOverridesOfType(C.TRACK_TYPE_VIDEO)
-                        .build()
+                        .clearVideoSizeConstraints().clearOverridesOfType(C.TRACK_TYPE_VIDEO).build()
                 } else {
-                    player.trackSelectionParameters.buildUpon()
-                        .setOverrideForType(override)
-                        .build()
+                    player.trackSelectionParameters.buildUpon().setOverrideForType(override).build()
                 }
-                tvQuality.text = labels[which].substringBefore(" (")
-            }
-            .show()
+                valQuality.text = labels[which].substringBefore(" (")
+            }.show()
     }
 
+    // ── Key handling ─────────────────────────────────────────────────────────
+
     private fun seekStepMs(repeatCount: Int): Long = when {
-        repeatCount == 0   -> 10_000L    // tap: ±10s
-        repeatCount <= 8   -> 30_000L    // hold ~0.5s: ±30s
-        repeatCount <= 20  -> 120_000L   // hold ~1s: ±2min
-        else               -> 600_000L   // hold ~2s+: ±10min
+        repeatCount == 0  -> 10_000L
+        repeatCount <= 8  -> 30_000L
+        repeatCount <= 20 -> 120_000L
+        else              -> 600_000L
     }
 
     private fun seekVideo(deltaMs: Long) {
         val newPos = (player.currentPosition + deltaMs).coerceIn(0, player.duration)
         player.seekTo(newPos)
-
         tvSeekDirection.text = if (deltaMs > 0) "⏩" else "⏪"
         tvSeekPosition.text = formatMs(newPos)
         seekOverlay.visibility = View.VISIBLE
@@ -453,70 +408,42 @@ class PlayerActivity : AppCompatActivity() {
 
     private fun formatMs(ms: Long): String {
         val totalSec = ms / 1000
-        val h = totalSec / 3600
-        val m = (totalSec % 3600) / 60
-        val s = totalSec % 60
+        val h = totalSec / 3600; val m = (totalSec % 3600) / 60; val s = totalSec % 60
         return if (h > 0) "%d:%02d:%02d".format(h, m, s) else "%d:%02d".format(m, s)
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         return when (keyCode) {
             KeyEvent.KEYCODE_DPAD_RIGHT -> {
-                if (isVodMode && !bottomBarVisible) {
-                    seekVideo(seekStepMs(event?.repeatCount ?: 0))
-                    true
-                } else super.onKeyDown(keyCode, event)
+                if (isVodMode && !bottomBarVisible) { seekVideo(seekStepMs(event?.repeatCount ?: 0)); true }
+                else super.onKeyDown(keyCode, event)
             }
             KeyEvent.KEYCODE_DPAD_LEFT -> {
-                if (isVodMode && !bottomBarVisible) {
-                    seekVideo(-seekStepMs(event?.repeatCount ?: 0))
-                    true
-                } else super.onKeyDown(keyCode, event)
+                if (isVodMode && !bottomBarVisible) { seekVideo(-seekStepMs(event?.repeatCount ?: 0)); true }
+                else super.onKeyDown(keyCode, event)
             }
-            KeyEvent.KEYCODE_MENU,
-            KeyEvent.KEYCODE_PROG_YELLOW,
-            KeyEvent.KEYCODE_SETTINGS,
-            KeyEvent.KEYCODE_INFO,
-            176 -> {
-                toggleBottomBar()
-                true
+            KeyEvent.KEYCODE_MENU, KeyEvent.KEYCODE_PROG_YELLOW,
+            KeyEvent.KEYCODE_SETTINGS, KeyEvent.KEYCODE_INFO, 176 -> {
+                toggleBottomBar(); true
             }
             KeyEvent.KEYCODE_DPAD_DOWN -> {
-                if (!bottomBarVisible) {
-                    showBottomBar()
-                    true
-                } else {
-                    super.onKeyDown(keyCode, event)
-                }
-            }
-            KeyEvent.KEYCODE_DPAD_UP -> {
-                if (bottomBarVisible) {
-                    hideBottomBar()
-                    true
-                } else {
-                    super.onKeyDown(keyCode, event)
-                }
+                if (!bottomBarVisible) { showBottomBar(); true }
+                else super.onKeyDown(keyCode, event)
             }
             KeyEvent.KEYCODE_BACK, KeyEvent.KEYCODE_ESCAPE -> {
-                if (bottomBarVisible) {
-                    hideBottomBar()
-                    true
-                } else {
-                    super.onKeyDown(keyCode, event)
-                }
+                if (bottomBarVisible) { hideBottomBar(); true }
+                else super.onKeyDown(keyCode, event)
             }
             else -> super.onKeyDown(keyCode, event)
         }
     }
 
-    private fun toggleBottomBar() {
-        if (bottomBarVisible) hideBottomBar() else showBottomBar()
-    }
+    private fun toggleBottomBar() { if (bottomBarVisible) hideBottomBar() else showBottomBar() }
 
     private fun showBottomBar() {
         bottomBarVisible = true
         bottomBar.visibility = View.VISIBLE
-        findViewById<View>(R.id.btn_quality).requestFocus()
+        chipChat.requestFocus()
     }
 
     private fun hideBottomBar() {
@@ -530,16 +457,8 @@ class PlayerActivity : AppCompatActivity() {
         else -> "$count diváků"
     }
 
-    override fun onPause() {
-        super.onPause()
-        player.pause()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        if (player.playbackState == Player.STATE_READY) player.play()
-    }
-
+    override fun onPause()   { super.onPause(); player.pause() }
+    override fun onResume()  { super.onResume(); if (player.playbackState == Player.STATE_READY) player.play() }
     override fun onDestroy() {
         super.onDestroy()
         vodPositionJob?.cancel()
